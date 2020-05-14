@@ -20,6 +20,10 @@ spec:
         ports:
         - containerPort: 3000
         - containerPort: 22
+        env:
+        - name: DISABLE_REGISTRATION
+          value: "true"
+
 ---
 apiVersion: v1
 kind: Service
@@ -29,24 +33,59 @@ spec:
   selector:
     app: gitea
   ports:
-  - name: gitea-http
+  - name: gitea-web
     protocol: TCP
     port: 3000
   - name: gitea-ssh
     protocol: TCP
     port: 22
+
 ---
-apiVersion: extensions/v1beta1
-kind: Ingress
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
 metadata:
-  name: gitea-ingress
-  annotations:
-    kubernetes.io/ingress.class: "traefik"
+  name: gitea-ingress-insecure
+  namespace: default
 spec:
-  rules:
-  - http:
-      paths:
-      - path: /
-        backend:
-          serviceName: gitea-service
-          servicePort: 3000
+  entryPoints:
+    - web
+  routes:
+  - match: Host(`git.zuh0.com`)
+    kind: Rule
+    services:
+    - name: gitea-service
+      port: 3000
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: gitea-ingress-secure
+  namespace: default
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - match: Host(`git.zuh0.com`)
+    kind: Rule
+    services:
+    - name: gitea-service
+      port: 3000
+  tls:
+    certResolver: tls-challenge
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRouteTCP
+metadata:
+  name: gitea-ingress-ssh
+  namespace: default
+spec:
+  entryPoints:
+    - ssh
+  routes:
+  - match: HostSNI(`*`)
+    kind: Rule
+    services:
+    - name: gitea-service
+      port: 22
