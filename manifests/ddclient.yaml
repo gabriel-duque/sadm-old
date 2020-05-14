@@ -14,6 +14,7 @@ stringData:
     login=<FIXME>
     password=<FIXME>
     dynamic.zuh0.com
+
 ---
 apiVersion: apps/v1
 kind: Deployment
