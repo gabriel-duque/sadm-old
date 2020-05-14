@@ -180,6 +180,9 @@ spec:
     - protocol: TCP
       name: websecure
       port: 443
+    - protocol: TCP
+      name: admin
+      port: 8080
   selector:
     app: traefik
   type: LoadBalancer
@@ -233,3 +236,34 @@ spec:
               containerPort: 80
             - name: websecure
               containerPort: 443
+            - name: admin
+              containerPort: 8080
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: traefik-ingress
+  namespace: default
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - match: Host(`traefik.zuh0.com`)
+    kind: Rule
+    services:
+    - name: api@internal
+      kind: TraefikService
+    middlewares:
+      - name: traefik-dashboard-auth
+  tls:
+    certResolver: tls-challenge
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: traefik-dashboard-auth
+spec:
+  basicAuth:
+    secret: traefik-dashboard-secret
