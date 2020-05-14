@@ -219,6 +219,8 @@ spec:
             - --accesslog
             - --entrypoints.ssh.Address=:22
             - --entrypoints.web.Address=:80
+            - --entrypoints.web.http.redirections.entrypoint.to=websecure
+            - --entrypoints.web.http.redirections.entrypoint.scheme=https
             - --entrypoints.websecure.Address=:443
             - --providers.kubernetescrd
             - --certificatesresolvers.tls-challenge.acme.tlschallenge

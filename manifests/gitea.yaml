@@ -44,29 +44,13 @@ spec:
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: gitea-ingress-insecure
-  namespace: default
-spec:
-  entryPoints:
-    - web
-  routes:
-  - match: Host(`git.zuh0.com`)
-    kind: Rule
-    services:
-    - name: gitea-service
-      port: 3000
-
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
-metadata:
   name: gitea-ingress-secure
   namespace: default
 spec:
   entryPoints:
     - websecure
   routes:
-  - match: Host(`git.zuh0.com`)
+  - match: Host(`git.zuh0.com`) || Host(`gitea.zuh0.com`)
     kind: Rule
     services:
     - name: gitea-service
